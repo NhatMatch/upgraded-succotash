@@ -18,8 +18,13 @@ with st.sidebar:
     api_key = st.text_input("Nhập Gemini API Key:", type="password", help="Khóa API lấy miễn phí từ Google AI Studio")
     
     khoi_lop = st.selectbox("Khối lớp:", ["Lớp 6", "Lớp 7", "Lớp 8", "Lớp 9"])
-    loai_kt = st.selectbox("Hình thức kiểm tra:", ["Kiểm tra định kì Giữa học kì 1", "Kiểm tra định kì Cuối học kì 1", 
-                                                    "Kiểm tra định kì Giữa học kì 2", "Kiểm tra định kì Cuối học kì 2", "Kiểm tra thường xuyên"])
+    loai_kt = st.selectbox("Hình thức kiểm tra:", [
+        "Kiểm tra định kì Giữa học kì 1", 
+        "Kiểm tra định kì Cuối học kì 1", 
+        "Kiểm tra định kì Giữa học kì 2", 
+        "Kiểm tra định kì Cuối học kì 2", 
+        "Kiểm tra thường xuyên"
+    ])
     thoi_gian = st.select_slider("Thời gian làm bài (phút):", options=[15, 45, 60, 90], value=60)
     
     st.markdown("---")
@@ -46,7 +51,6 @@ noi_dung_them = st.text_area("Hoặc dán trực tiếp nội dung/chủ đề k
 def export_to_docx(content_text, khoi, loai, time):
     doc = docx.Document()
     
-    # Tiêu đề tài liệu
     title = doc.add_heading(f"HỒ SƠ ĐỀ KIỂM TRA MÔN TOÁN {khoi.upper()}", level=0)
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
@@ -57,7 +61,6 @@ def export_to_docx(content_text, khoi, loai, time):
     
     doc.add_paragraph("--------------------------------------------------------------------------------")
     
-    # Chèn nội dung được sinh ra từ AI
     lines = content_text.split('\n')
     for line in lines:
         if line.startswith("### "):
@@ -81,9 +84,8 @@ if st.button("🚀 Tạo trọn bộ hồ sơ kiểm tra", type="primary"):
         with st.spinner("Đang phân tích dữ liệu và biên soạn: Ma trận, Bản đặc tả, Đề thi và Hướng dẫn chấm..."):
             try:
                 genai.configure(api_key=api_key)
-                model = genai.GenerativeModel("gemini-1.5-flash")
+                model = genai.GenerativeModel("gemini-2.5-flash")
                 
-                # Trích xuất sơ bộ văn bản (nếu người dùng upload file txt)
                 context_data = noi_dung_them
                 if uploaded_file is not None:
                     if uploaded_file.type == "text/plain":
@@ -113,7 +115,6 @@ if st.button("🚀 Tạo trọn bộ hồ sơ kiểm tra", type="primary"):
                 
                 st.success("✅ Đã hoàn thành biên soạn hồ sơ kiểm tra!")
                 
-                # Nút tải file Word
                 word_file = export_to_docx(ket_qua, khoi_lop, loai_kt, thoi_gian)
                 st.download_button(
                     label="📥 TẢI XUỐNG FILE WORD (.DOCX)",
@@ -122,7 +123,6 @@ if st.button("🚀 Tạo trọn bộ hồ sơ kiểm tra", type="primary"):
                     mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                 )
                 
-                # Hiển thị bản xem trước
                 with st.expander("Xem trước nội dung đã tạo trên web:"):
                     st.markdown(ket_qua)
                     
